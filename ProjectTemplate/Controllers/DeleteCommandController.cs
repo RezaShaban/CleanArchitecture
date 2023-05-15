@@ -2,7 +2,7 @@
 
 namespace WebUI.Controllers
 {
-    public class CommandController<TCreateCommand, TUpdateCommand, TDeleteCommand> : ApiControllerBase
+    public class DeleteCommandController<TDeleteCommand> : ApiControllerBase
     {
         //TODO: should be implement in QueryController
         //[HttpGet]
@@ -10,19 +10,6 @@ namespace WebUI.Controllers
         //{
         //    return await Mediator.Send(query);
         //}
-
-        [HttpPost]
-        public async Task<ActionResult<object?>> Create(TCreateCommand command, CancellationToken token)
-        {
-            return await Mediator.Send(command, token);
-        }
-
-        [HttpPut]
-        public async Task<ActionResult> Update(TUpdateCommand command, CancellationToken token)
-        {
-            var result = await Mediator.Send(command, token);
-            return Ok(result);
-        }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(long id, CancellationToken token)
