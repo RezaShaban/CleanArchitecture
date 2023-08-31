@@ -4,6 +4,7 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -26,9 +27,9 @@ namespace Infrastructure.Persistence
             _currentUserService = currentUserService;
             _domainEventService = domainEventService;
             _timeService = timeService;
-        }
 
-        //TODO: entities should be set in the context
+            Migrate();
+        }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
@@ -61,8 +62,17 @@ namespace Infrastructure.Persistence
             return result;
         }
 
+        public void Migrate()
+        {
+            Database.EnsureCreated();
+            Database.Migrate();
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
+
+            AddEntities(builder);
+
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             base.OnModelCreating(builder);
@@ -75,6 +85,24 @@ namespace Infrastructure.Persistence
                 @event.IsPublished = true;
                 await _domainEventService.Publish(@event);
             }
+        }
+
+        private void AddEntities(ModelBuilder modelBuilder)
+        {
+            var candidates = GetEntities();
+
+            var entityMethod = typeof(ModelBuilder).GetMethod("Entity", new Type[] { });
+
+            foreach (var item in candidates)
+            {
+                entityMethod.MakeGenericMethod(item)
+                    .Invoke(modelBuilder, new object[] { });
+            }
+        }
+
+        private IEnumerable<Type> GetEntities()
+        {
+            return typeof(AuditableEntity).Assembly.GetExportedTypes().Where(x => x.Namespace == ("Domain.Entities")); //&& !x.GetCustomAttributes(typeof(NoEntityAttribute), false).Any()
         }
     }
 }

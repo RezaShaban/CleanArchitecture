@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Entities
 {
     public class ProductSku: AuditableEntity, ISoftDelete, IHasDomainEvent
     {
@@ -8,6 +10,8 @@
         public long ProductId { get; set; }
         public bool IsDeleted { get; set; }
         public Product Product { get; set; }
+
+        [NotMapped]
         public List<DomainEvent> DomainEvents { get; set; } = new List<DomainEvent>();
     }
 }

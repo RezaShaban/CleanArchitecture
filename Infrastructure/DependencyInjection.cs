@@ -22,9 +22,9 @@ namespace Infrastructure
             }
             else
             {
+                string connectionString = configuration.GetConnectionString("DefaultConnection");
                 services.AddDbContext<CommandDbContext>(options =>
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("DefaultConnection"),
+                    options.UseSqlServer(connectionString,
                         b => b.MigrationsAssembly(typeof(CommandDbContext).Assembly.FullName)));
             }
 
